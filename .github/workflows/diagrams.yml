@@ -1,0 +1,48 @@
+name: Generate Architecture Diagrams
+
+on:
+  push:
+    branches:
+      - main
+    # Only run the action if files in the diagrams folder change
+    paths:
+      - 'diagrams/**.py'
+      - '.github/workflows/diagrams.yml'
+
+jobs:
+  build-diagrams:
+    runs-on: ubuntu-latest
+    
+    # Grant permissions needed to commit changes back to the repo
+    permissions:
+      contents: write 
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      # Graphviz is required at the OS level for the diagrams library to render
+      - name: Install Graphviz
+        run: sudo apt-get update && sudo apt-get install -y graphviz
+
+      - name: Install Python dependencies
+        run: pip install diagrams
+
+      - name: Ensure images directory exists
+        run: mkdir -p images
+
+      # Run the Python script from the root directory
+      - name: Generate Diagrams
+        run: python diagrams/architecture.py
+
+      # Automatically commit the new image back to the repository
+      - name: Commit generated images
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "docs: Auto-update architecture diagram"
+          file_pattern: 'images/*.png'
