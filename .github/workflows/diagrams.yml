@@ -6,7 +6,7 @@ on:
       - main
     # Only run the action if files in the diagrams folder change
     paths:
-      - 'diagrams/**.py'
+      - 'diagrams/phase1/**.py'
       - '.github/workflows/diagrams.yml'
 
 jobs:
@@ -34,15 +34,19 @@ jobs:
         run: pip install diagrams
 
       - name: Ensure images directory exists
-        run: mkdir -p images
+        run: mkdir -p images/phase1
 
-      # Run the Python script from the root directory
+      # Dynamically run all python scripts in the directory
       - name: Generate Diagrams
-        run: python diagrams/architecture.py
+        run: |
+          for script in diagrams/phase1/*.py; do
+            python "$script"
+          done
 
-      # Automatically commit the new image back to the repository
+      # Automatically commit the new images back to the repository
       - name: Commit generated images
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "docs: Auto-update architecture diagram"
-          file_pattern: 'images/*.png'
+          commit_message: "docs: Auto-update phase 1 architecture diagrams"
+          # Updated to target the new images folder
+          file_pattern: 'images/phase1/*.png'

@@ -1,3 +1,7 @@
 # Architecture-Diagrams
 
-![Architecture Diagram](./images/system_architecture.png)
+## Phase 1
+
+![Application Architecture](./images/phase1/application_arch.png)
+
+![System Architecture](./images/phase1/system_arch.png)
