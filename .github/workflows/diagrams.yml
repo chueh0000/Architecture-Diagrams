@@ -4,9 +4,9 @@ on:
   push:
     branches:
       - main
-    # Only run the action if files in the diagrams folder change
+    # Watch all subdirectories inside diagrams/
     paths:
-      - 'diagrams/phase1/**.py'
+      - 'diagrams/**/*.py'
       - '.github/workflows/diagrams.yml'
 
 jobs:
@@ -33,20 +33,24 @@ jobs:
       - name: Install Python dependencies
         run: pip install diagrams
 
-      - name: Ensure images directory exists
-        run: mkdir -p images/phase1
+      # Dynamically create matching image directories (e.g., images/phase1, images/phase2)
+      - name: Ensure images directories exist
+        run: |
+          for dir in diagrams/*/; do
+            mkdir -p "images/$(basename "$dir")"
+          done
 
-      # Dynamically run all python scripts in the directory
+      # Find and run all Python scripts in any subdirectory of diagrams/
       - name: Generate Diagrams
         run: |
-          for script in diagrams/phase1/*.py; do
+          find diagrams -name "*.py" -type f | while read -r script; do
+            echo "Generating diagram for $script..."
             python "$script"
           done
 
-      # Automatically commit the new images back to the repository
+      # Automatically commit any new or changed images in all subdirectories
       - name: Commit generated images
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "docs: Auto-update phase 1 architecture diagrams"
-          # Updated to target the new images folder
-          file_pattern: 'images/phase1/*.png'
+          commit_message: "docs: Auto-update architecture diagrams"
+          file_pattern: 'images/**/*.png'
